@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Filter, Maximize2, Minimize2, Plus, Minus, Layers, MapPinned, Loader2, Leaf, AlertTriangle } from 'lucide-react'
+import { ChevronDown, Filter, Maximize2, Minimize2, Plus, Minus, Layers, MapPinned, Loader2, Leaf, AlertTriangle, Building2 } from 'lucide-react'
 import { cropLegend } from '../lib/cropPoints.js'
 import { CLASSIFICATION_LABELS, ISLAMABAD_CENTER, ensureClassificationLayer } from '../lib/classification.js'
 import { fetchVegetationTile } from '../lib/vegetationApi.js'
+import { syncBuildingLayers, removeBuildingLayers } from '../lib/buildings.js'
 import MapboxCropMap from './MapboxCropMap.jsx'
 
 const STYLES = {
@@ -33,6 +34,11 @@ export default function CropMapOverview() {
   const [vegLoading, setVegLoading] = useState(false)
   const [vegError, setVegError] = useState(null)
   const [vegMeta, setVegMeta] = useState(null) // { date, min, max, palette }
+
+  // Building footprints (TileServer GL, LAN-only) — loaded per-district as the
+  // viewport pans, see src/lib/buildings.js.
+  const [showBuildings, setShowBuildings] = useState(false)
+  const buildingsMoveHandlerRef = useRef(null)
 
   const handleMapLoad = (map) => {
     mapRef.current = map
@@ -97,6 +103,7 @@ export default function CropMapOverview() {
     map.once('style.load', () => {
       if (showClassification) loadClassification(map)
       if (vegIndex) loadVegetationLayer(map, vegIndex)
+      if (showBuildings) syncBuildingLayers(map)
     })
   }
 
@@ -124,6 +131,25 @@ export default function CropMapOverview() {
       return
     }
     if (map) loadVegetationLayer(map, next)
+  }
+
+  const toggleBuildings = () => {
+    const map = mapRef.current
+    const next = !showBuildings
+    setShowBuildings(next)
+    if (!map) return
+    if (next) {
+      syncBuildingLayers(map)
+      const handler = () => syncBuildingLayers(map)
+      buildingsMoveHandlerRef.current = handler
+      map.on('moveend', handler)
+    } else {
+      if (buildingsMoveHandlerRef.current) {
+        map.off('moveend', buildingsMoveHandlerRef.current)
+        buildingsMoveHandlerRef.current = null
+      }
+      removeBuildingLayers(map)
+    }
   }
 
   useEffect(() => {
@@ -186,6 +212,18 @@ export default function CropMapOverview() {
         >
           {classificationLoading ? <Loader2 size={12} className="animate-spin" /> : <MapPinned size={12} />}
           Islamabad Classification
+        </button>
+
+        <button
+          onClick={toggleBuildings}
+          className={`flex items-center gap-1 text-xs rounded-lg px-2 py-1 border ${
+            showBuildings
+              ? 'bg-forest-600 text-white border-forest-600'
+              : 'border-surface-600 text-gray-300 hover:bg-surface-700'
+          }`}
+        >
+          <Building2 size={12} />
+          Buildings
         </button>
 
         <div className="flex items-center rounded-lg border border-surface-600 overflow-hidden">
@@ -295,14 +333,26 @@ export default function CropMapOverview() {
               </ul>
             </div>
           )}
+
+          {showBuildings && (
+            <div className="pt-2 border-t border-surface-600">
+              <p className="text-[11px] font-semibold text-gray-100 mb-1.5">Buildings</p>
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-300">
+                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: '#d97706' }} />
+                Footprints (visible from zoom 13)
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="absolute bottom-2 left-3 text-[10px] bg-surface-800/85 px-2 py-1 rounded text-gray-400 z-10">
-          {vegIndex
-            ? `MODIS ${vegIndex.toUpperCase()} (MOD13Q1) via Earth Engine${vegMeta ? ` | Composite: ${vegMeta.date}` : ''}`
-            : showClassification
-              ? 'Islamabad classification | User-supplied data'
-              : 'Source: Sentinel-2 & Mapbox | Last Updated: 20 May 2024'}
+        <div className="absolute bottom-2 left-3 text-[10px] bg-surface-800/85 px-2 py-1 rounded text-gray-400 z-10 max-w-[70%]">
+          {[
+            vegIndex && `MODIS ${vegIndex.toUpperCase()} (MOD13Q1) via Earth Engine${vegMeta ? ` | Composite: ${vegMeta.date}` : ''}`,
+            showClassification && 'Islamabad classification | User-supplied data',
+            showBuildings && 'Building footprints | TileServer GL (LAN)',
+          ]
+            .filter(Boolean)
+            .join('  •  ') || 'Source: Sentinel-2 & Mapbox | Last Updated: 20 May 2024'}
         </div>
       </div>
     </div>
