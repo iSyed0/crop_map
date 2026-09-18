@@ -111,7 +111,7 @@ export default function MapboxCropMap({ onMapLoad }) {
 
   if (!MAPBOX_TOKEN) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-amber-50 text-amber-700 text-sm p-6 text-center">
+      <div className="w-full h-full flex items-center justify-center bg-amber-500/10 text-amber-300 text-sm p-6 text-center">
         Missing Mapbox token — set <code className="mx-1 font-mono">VITE_MAPBOX_TOKEN</code> in .env
       </div>
     )

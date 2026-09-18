@@ -11,6 +11,18 @@ export default {
           700: '#155a34',
           600: '#1a7a44',
           500: '#1f9350',
+          // Lighter accent for text/icons on dark surfaces -- 500 and darker
+          // don't clear WCAG AA against the surface-800/900 backgrounds.
+          400: '#3ecf7e',
+        },
+        // Dark portal surfaces -- page background down to raised card/hover
+        // tones. A neutral near-black with a faint green tint so it sits
+        // comfortably alongside the forest-green sidebar/accents.
+        surface: {
+          900: '#0a100d',
+          800: '#111b16',
+          700: '#1a2620',
+          600: '#293a30',
         },
       },
       fontFamily: {

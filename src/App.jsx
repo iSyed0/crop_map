@@ -17,7 +17,7 @@ import NotFound from './pages/NotFound.jsx'
 
 export default function App() {
   return (
-    <div className="h-screen flex overflow-hidden bg-[#f4f6f5]">
+    <div className="h-screen flex overflow-hidden bg-surface-900">
       <Sidebar />
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
         <TopHeader />

@@ -10,16 +10,16 @@ const iconMap = {
 
 const statusStyles = {
   done: 'bg-forest-600 text-white',
-  active: 'bg-forest-600 text-white ring-4 ring-forest-100',
-  upcoming: 'bg-gray-100 text-gray-400',
+  active: 'bg-forest-600 text-white ring-4 ring-forest-500/30',
+  upcoming: 'bg-surface-700 text-gray-500',
 }
 
 export default function CropCalendar() {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-card p-3">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3">Crop Calendar (Kharif 2024)</h3>
+    <div className="bg-surface-800 rounded-xl border border-surface-600 shadow-card p-3">
+      <h3 className="text-sm font-semibold text-gray-50 mb-3">Crop Calendar (Kharif 2024)</h3>
       <div className="flex items-start justify-between relative px-1">
-        <div className="absolute top-4 left-6 right-6 h-0.5 bg-gray-100 -z-0" />
+        <div className="absolute top-4 left-6 right-6 h-0.5 bg-surface-600 -z-0" />
         {cropCalendar.map((c) => {
           const Icon = iconMap[c.label]
           return (
@@ -27,8 +27,8 @@ export default function CropCalendar() {
               <span className={`w-8 h-8 rounded-full flex items-center justify-center ${statusStyles[c.status]}`}>
                 <Icon size={14} />
               </span>
-              <p className="text-xs font-semibold text-gray-900">{c.label}</p>
-              <p className="text-[10px] text-gray-500">{c.range}</p>
+              <p className="text-xs font-semibold text-gray-100">{c.label}</p>
+              <p className="text-[10px] text-gray-400">{c.range}</p>
             </div>
           )
         })}

@@ -10,11 +10,11 @@ const iconMap = {
 }
 
 const bgMap = {
-  sprout: 'bg-emerald-50 text-emerald-700',
-  leaf: 'bg-green-50 text-green-700',
-  'map-pin': 'bg-teal-50 text-teal-700',
-  'alert-triangle': 'bg-orange-50 text-orange-600',
-  'file-text': 'bg-blue-50 text-blue-700',
+  sprout: 'bg-emerald-500/15 text-emerald-400',
+  leaf: 'bg-green-500/15 text-green-400',
+  'map-pin': 'bg-teal-500/15 text-teal-400',
+  'alert-triangle': 'bg-orange-500/15 text-orange-400',
+  'file-text': 'bg-blue-500/15 text-blue-400',
 }
 
 export default function StatCards() {
@@ -23,16 +23,16 @@ export default function StatCards() {
       {stats.map((s) => {
         const Icon = iconMap[s.icon]
         return (
-          <div key={s.label} className="bg-white rounded-lg border border-gray-100 shadow-card p-3 flex items-start gap-2.5">
+          <div key={s.label} className="bg-surface-800 rounded-lg border border-surface-600 shadow-card p-3 flex items-start gap-2.5">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${bgMap[s.icon]}`}>
               <Icon size={16} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] text-gray-500 leading-tight truncate">{s.label}</p>
-              <p className="text-lg font-bold text-gray-900 leading-tight">
-                {s.value} <span className="text-xs font-medium text-gray-500">{s.unit}</span>
+              <p className="text-[11px] text-gray-400 leading-tight truncate">{s.label}</p>
+              <p className="text-lg font-bold text-gray-50 leading-tight">
+                {s.value} <span className="text-xs font-medium text-gray-400">{s.unit}</span>
               </p>
-              <p className={`text-[10px] flex items-center gap-1 ${s.trendUp ? 'text-emerald-600' : 'text-gray-400'}`}>
+              <p className={`text-[10px] flex items-center gap-1 ${s.trendUp ? 'text-emerald-400' : 'text-gray-500'}`}>
                 {s.trendUp && <TrendingUp size={10} />}
                 {s.trend}
               </p>

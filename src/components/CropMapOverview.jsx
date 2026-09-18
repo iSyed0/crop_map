@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Filter, Maximize2, Minimize2, X, Plus, Minus, Layers, MapPinned, Loader2, Leaf, AlertTriangle } from 'lucide-react'
+import { ChevronDown, Filter, Maximize2, Minimize2, Plus, Minus, Layers, MapPinned, Loader2, Leaf, AlertTriangle } from 'lucide-react'
 import { cropLegend } from '../lib/cropPoints.js'
 import { CLASSIFICATION_LABELS, ISLAMABAD_CENTER, ensureClassificationLayer } from '../lib/classification.js'
 import { fetchVegetationTile } from '../lib/vegetationApi.js'
@@ -144,14 +144,14 @@ export default function CropMapOverview() {
     <div
       className={
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-white p-4 flex flex-col'
-          : 'bg-white rounded-xl border border-gray-100 shadow-card p-3'
+          ? 'fixed inset-0 z-50 bg-surface-900 p-4 flex flex-col'
+          : 'bg-surface-800 rounded-xl border border-surface-600 shadow-card p-3'
       }
     >
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-        <h3 className="text-sm font-semibold text-gray-900">Crop Map Overview</h3>
+        <h3 className="text-sm font-semibold text-gray-50">Crop Map Overview</h3>
         <button
-          className="flex items-center gap-1.5 text-xs text-forest-700 border border-forest-200 rounded-lg px-2.5 py-1 hover:bg-forest-50"
+          className="flex items-center gap-1.5 text-xs text-forest-400 border border-forest-700 rounded-lg px-2.5 py-1 hover:bg-forest-900/40"
           onClick={() => setIsFullscreen((v) => !v)}
         >
           {isFullscreen ? (
@@ -167,13 +167,13 @@ export default function CropMapOverview() {
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 mb-2">
-        <button className="flex items-center gap-1 text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-700">
+        <button className="flex items-center gap-1 text-xs border border-surface-600 rounded-lg px-2 py-1 text-gray-300">
           Kharif 2024 <ChevronDown size={12} />
         </button>
-        <button className="flex items-center gap-1 text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-700">
+        <button className="flex items-center gap-1 text-xs border border-surface-600 rounded-lg px-2 py-1 text-gray-300">
           All Crops <ChevronDown size={12} />
         </button>
-        <button className="flex items-center gap-1 text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-700">
+        <button className="flex items-center gap-1 text-xs border border-surface-600 rounded-lg px-2 py-1 text-gray-300">
           <Filter size={12} /> Filters
         </button>
         <button
@@ -181,20 +181,20 @@ export default function CropMapOverview() {
           className={`flex items-center gap-1 text-xs rounded-lg px-2 py-1 border ${
             showClassification
               ? 'bg-forest-600 text-white border-forest-600'
-              : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+              : 'border-surface-600 text-gray-300 hover:bg-surface-700'
           }`}
         >
           {classificationLoading ? <Loader2 size={12} className="animate-spin" /> : <MapPinned size={12} />}
           Islamabad Classification
         </button>
 
-        <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden">
+        <div className="flex items-center rounded-lg border border-surface-600 overflow-hidden">
           {['ndvi', 'evi'].map((key) => (
             <button
               key={key}
               onClick={() => toggleVegetation(key)}
               className={`flex items-center gap-1 text-xs px-2 py-1 uppercase ${
-                vegIndex === key ? 'bg-forest-600 text-white' : 'text-gray-700 hover:bg-gray-50'
+                vegIndex === key ? 'bg-forest-600 text-white' : 'text-gray-300 hover:bg-surface-700'
               }`}
             >
               {vegLoading && vegIndex === key ? <Loader2 size={12} className="animate-spin" /> : <Leaf size={12} />}
@@ -202,54 +202,45 @@ export default function CropMapOverview() {
             </button>
           ))}
         </div>
-
-        {isFullscreen && (
-          <button
-            className="ml-auto flex items-center gap-1 text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-700 hover:bg-gray-50"
-            onClick={() => setIsFullscreen(false)}
-          >
-            <X size={12} /> Close
-          </button>
-        )}
       </div>
 
       {vegError && (
-        <div className="flex items-start gap-1.5 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 mb-2">
+        <div className="flex items-start gap-1.5 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg px-2 py-1.5 mb-2">
           <AlertTriangle size={13} className="shrink-0 mt-0.5" />
           <span>{vegError}</span>
         </div>
       )}
 
       <div
-        className="relative rounded-lg overflow-hidden border border-gray-200 flex-1 min-h-0"
+        className="relative rounded-lg overflow-hidden border border-surface-600 flex-1 min-h-0"
         style={isFullscreen ? undefined : { height: 360 }}
       >
         <MapboxCropMap onMapLoad={handleMapLoad} />
 
-        <div className="absolute top-3 left-3 flex flex-col gap-1 bg-white rounded-lg shadow-card overflow-hidden border border-gray-200 z-10">
-          <button className="p-2 hover:bg-gray-50 border-b border-gray-200" onClick={() => mapRef.current?.zoomIn()}>
+        <div className="absolute top-3 left-3 flex flex-col gap-1 bg-surface-800 rounded-lg shadow-card overflow-hidden border border-surface-600 z-10">
+          <button className="p-2 hover:bg-surface-700 border-b border-surface-600 text-gray-200" onClick={() => mapRef.current?.zoomIn()}>
             <Plus size={15} />
           </button>
-          <button className="p-2 hover:bg-gray-50" onClick={() => mapRef.current?.zoomOut()}>
+          <button className="p-2 hover:bg-surface-700 text-gray-200" onClick={() => mapRef.current?.zoomOut()}>
             <Minus size={15} />
           </button>
         </div>
 
         <div className="absolute top-14 left-3 z-10">
           <button
-            className="p-2 bg-white rounded-lg shadow-card border border-gray-200 hover:bg-gray-50"
+            className="p-2 bg-surface-800 rounded-lg shadow-card border border-surface-600 hover:bg-surface-700 text-gray-200"
             onClick={() => setShowLayers((v) => !v)}
           >
             <Layers size={15} />
           </button>
           {showLayers && (
-            <div className="mt-1 bg-white rounded-lg shadow-card border border-gray-200 p-1 w-32 text-xs">
+            <div className="mt-1 bg-surface-800 rounded-lg shadow-card border border-surface-600 p-1 w-32 text-xs">
               {Object.entries(STYLES).map(([key, { label }]) => (
                 <button
                   key={key}
                   onClick={() => setStyle(key)}
                   className={`w-full text-left px-2 py-1.5 rounded ${
-                    styleKey === key ? 'bg-forest-50 text-forest-700 font-medium' : 'hover:bg-gray-50 text-gray-700'
+                    styleKey === key ? 'bg-forest-500/15 text-forest-400 font-medium' : 'hover:bg-surface-700 text-gray-300'
                   }`}
                 >
                   {label}
@@ -259,52 +250,54 @@ export default function CropMapOverview() {
           )}
         </div>
 
-        <div className="absolute top-2 right-2 bg-white/95 rounded-lg shadow-card border border-gray-200 p-2 w-40 z-10 max-h-[85%] overflow-y-auto">
-          {vegIndex ? (
-            <>
-              <p className="text-[11px] font-semibold text-gray-800 mb-1.5">{vegIndex.toUpperCase()} (MODIS)</p>
+        <div className="absolute top-2 right-2 bg-surface-800/95 rounded-lg shadow-card border border-surface-600 p-2 w-40 z-10 max-h-[85%] overflow-y-auto space-y-2">
+          <div>
+            <p className="text-[11px] font-semibold text-gray-100 mb-1.5">Dominant Crop</p>
+            <ul className="space-y-1">
+              {cropLegend.map((l) => (
+                <li key={l.crop} className="flex items-center gap-1.5 text-[10px] text-gray-300">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: l.color }} />
+                  {l.crop}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {vegIndex && (
+            <div className="pt-2 border-t border-surface-600">
+              <p className="text-[11px] font-semibold text-gray-100 mb-1.5">{vegIndex.toUpperCase()} (MODIS)</p>
               {vegMeta && (
                 <>
                   <div
                     className="h-2.5 rounded-full mb-1"
                     style={{ background: `linear-gradient(to right, ${vegMeta.palette.join(',')})` }}
                   />
-                  <div className="flex justify-between text-[9px] text-gray-500 mb-1.5">
+                  <div className="flex justify-between text-[9px] text-gray-400 mb-1.5">
                     <span>{vegMeta.min.toFixed(1)}</span>
                     <span>{vegMeta.max.toFixed(1)}</span>
                   </div>
-                  <p className="text-[9px] text-gray-500">Composite: {vegMeta.date}</p>
+                  <p className="text-[9px] text-gray-400">Composite: {vegMeta.date}</p>
                 </>
               )}
-            </>
-          ) : showClassification ? (
-            <>
-              <p className="text-[11px] font-semibold text-gray-800 mb-1.5">Islamabad Classification</p>
+            </div>
+          )}
+
+          {showClassification && (
+            <div className="pt-2 border-t border-surface-600">
+              <p className="text-[11px] font-semibold text-gray-100 mb-1.5">Islamabad Classification</p>
               <ul className="space-y-1">
                 {Object.entries(CLASSIFICATION_LABELS).map(([dn, info]) => (
-                  <li key={dn} className="flex items-center gap-1.5 text-[10px] text-gray-700">
+                  <li key={dn} className="flex items-center gap-1.5 text-[10px] text-gray-300">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: info.color }} />
                     {info.label}
                   </li>
                 ))}
               </ul>
-            </>
-          ) : (
-            <>
-              <p className="text-[11px] font-semibold text-gray-800 mb-1.5">Dominant Crop</p>
-              <ul className="space-y-1">
-                {cropLegend.map((l) => (
-                  <li key={l.crop} className="flex items-center gap-1.5 text-[10px] text-gray-700">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: l.color }} />
-                    {l.crop}
-                  </li>
-                ))}
-              </ul>
-            </>
+            </div>
           )}
         </div>
 
-        <div className="absolute bottom-2 left-3 text-[10px] bg-white/85 px-2 py-1 rounded text-gray-600 z-10">
+        <div className="absolute bottom-2 left-3 text-[10px] bg-surface-800/85 px-2 py-1 rounded text-gray-400 z-10">
           {vegIndex
             ? `MODIS ${vegIndex.toUpperCase()} (MOD13Q1) via Earth Engine${vegMeta ? ` | Composite: ${vegMeta.date}` : ''}`
             : showClassification
