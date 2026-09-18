@@ -2,7 +2,12 @@
 //
 // Product: MODIS/061/MOD13Q1 — Terra, 16-day composite, 250m, bands NDVI and
 // EVI scaled by 1e-4. https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MOD13Q1
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import ee, { initEarthEngine, evaluate } from './ee.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const MODIS_COLLECTION = 'MODIS/061/MOD13Q1'
 const SCALE = 0.0001
@@ -14,15 +19,24 @@ const INDEX_BANDS = { ndvi: 'NDVI', evi: 'EVI' }
 // processing/ingestion latency.
 const LOOKBACK_DAYS = 60
 
-// The real Pakistan national boundary, not a bounding box — a rectangle
-// would spill into Afghanistan/Iran/India/China at the corners. Pulled from
-// Earth Engine's own boundary table (already hosted server-side, so this
-// never needs our ~20k-vertex shapefile transferred anywhere) rather than
-// src/lib/cropPoints.js's PAKISTAN_BOUNDS, which is just a map-fitting box.
+// The real Pakistan national boundary (incl. Jammu & Kashmir, per Pakistan's
+// official national boundary dataset), not a bounding box — a rectangle
+// would spill into Afghanistan/Iran/India/China at the corners.
+//
+// Sourced from data/pakistan-boundary.geojson: the government's own
+// Pakistan_National.geojson (mainland + J&K + minor islands, ~82k vertices
+// combined), unioned and simplified to ~5.8k vertices at data/build-boundary.py
+// (well under MODIS's 250m pixel size, so no visible loss of accuracy) so it's
+// small enough to embed inline in every Earth Engine request. Loaded once at
+// module scope — this is plain JSON parsing, not an ee.* call, so it's safe
+// before initEarthEngine().
+const boundaryGeojsonPath = path.join(__dirname, '..', 'data', 'pakistan-boundary.geojson')
+const boundaryGeojson = JSON.parse(fs.readFileSync(boundaryGeojsonPath, 'utf8'))
+
 // Built lazily (not at module scope) — any ee.* constructor call reaches out
 // to Earth Engine's API, which throws if it runs before initEarthEngine().
 function pakistanBoundary() {
-  return ee.FeatureCollection('USDOS/LSIB_SIMPLE/2017').filter(ee.Filter.eq('country_co', 'PK')).geometry()
+  return ee.Geometry(boundaryGeojson.features[0].geometry)
 }
 
 // Standard Earth Engine NDVI ramp (white/brown -> yellow -> dark green).
@@ -79,15 +93,19 @@ async function getLatestImage(indexKey, endDateStr) {
   const latest = ee.Image(collection.sort('system:time_start', false).first())
   const dateMillis = await evaluate(latest.get('system:time_start'))
 
-  // Plain .clip() fails here: MODIS is natively in a sinusoidal projection
-  // (SR-ORG:6974), and reprojecting a large lat/lon rectangle's edges into
-  // that grid can't always be solved exactly ("Unable to transform edge ...
-  // to EPSG:4326"). clipToBoundsAndScale reprojects the image to the clip
-  // geometry's CRS first, which sidesteps that edge-transform entirely.
-  const clipped = latest.multiply(SCALE).rename(indexKey).clipToBoundsAndScale({
-    geometry: pakistanBoundary(),
-    scale: 250,
-  })
+  // Plain .clip() on the raw image fails here: MODIS is natively in a
+  // sinusoidal projection (SR-ORG:6974), and transforming Pakistan's
+  // ~20k-vertex polygon edges into that grid can't always be solved exactly
+  // ("Unable to transform edge ... to EPSG:4326"). Reprojecting to a plain
+  // lat/lon grid *before* clipping makes the edge transform EPSG:4326 ->
+  // EPSG:4326 (trivial), then .clip() masks out everything beyond the
+  // polygon — unlike clipToBoundsAndScale, which only crops to Pakistan's
+  // bounding *rectangle* and leaves neighboring countries' pixels opaque.
+  const clipped = latest
+    .multiply(SCALE)
+    .rename(indexKey)
+    .reproject({ crs: 'EPSG:4326', scale: 250 })
+    .clip(pakistanBoundary())
 
   return {
     image: clipped,

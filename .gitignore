@@ -3,3 +3,11 @@ dist
 .env
 .env.local
 *.log
+
+# Raw source boundary/admin datasets (100s of MB, too large for git) --
+# server/data/pakistan-boundary.geojson is the derived, simplified file
+# actually used by the app; see server/data/build-boundary.py.
+/Pakistan_National.geojson
+/Pakistan_Provinces.geojson
+/Pakistan_Districts.geojson
+/Pakistan_Tehsils.geojson
